@@ -1,1 +1,275 @@
-htdocs/LekorLici
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>LekorLicious</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #eef2f3;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #ff6600;
+      margin-bottom: 30px;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      background-color: #fff;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+
+    th {
+      background-color: #ffcc66;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+
+    .status-active {
+      color: green;
+      font-weight: bold;
+    }
+
+    .status-inactive {
+      color: red;
+      font-weight: bold;
+    }
+
+    button {
+      padding: 6px 10px;
+      margin: 2px;
+      background-color: #ff9933;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    button:hover {
+      background-color: #e67e00;
+    }
+
+    .delete-btn {
+      background-color: #e74c3c;
+    }
+
+    .delete-btn:hover {
+      background-color: #c0392b;
+    }
+
+    .action-btn {
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 10;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.4);
+    }
+
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 10px;
+      width: 400px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .modal input, .modal select {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0;
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 24px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close:hover {
+      color: black;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>LekorLicious</h1>
+
+  <button onclick="openModal()">+ Add Customer</button>
+
+  <table id="customerTable">
+    <thead>
+      <tr>
+        <th>Customer ID</th>
+        <th>Name</th>
+        <th>Address</th>
+        <th>Postcode</th>
+        <th>State</th>
+        <th>Account Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>C001</td>
+        <td>Ahmad Ali</td>
+        <td>123 Jalan Lekor</td>
+        <td>21000</td>
+        <td>Terengganu</td>
+        <td class="status-active">Active</td>
+        <td class="action-btn">
+          <button onclick="toggleEdit(this)">Edit</button>
+          <button class="delete-btn" onclick="deleteRow(this)">Delete</button>
+        </td>
+      </tr>
+      <tr>
+        <td>C002</td>
+        <td>Siti Aminah</td>
+        <td>45 Taman Pantai</td>
+        <td>17000</td>
+        <td>Kelantan</td>
+        <td class="status-inactive">Inactive</td>
+        <td class="action-btn">
+          <button onclick="toggleEdit(this)">Edit</button>
+          <button class="delete-btn" onclick="deleteRow(this)">Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Modal -->
+  <div id="addModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h3>Add New Customer</h3>
+      <form id="addForm">
+        <input type="text" id="custId" placeholder="Customer ID" required>
+        <input type="text" id="custName" placeholder="Name" required>
+        <input type="text" id="custAddress" placeholder="Address" required>
+        <input type="text" id="custPostcode" placeholder="Postcode" required>
+        <input type="text" id="custState" placeholder="State" required>
+        <select id="custStatus" required>
+          <option value="">--Select Status--</option>
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+        <button type="submit" style="margin-top: 10px;">Add Customer</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    function toggleEdit(button) {
+      const row = button.parentElement.parentElement;
+      const isEditing = row.classList.contains('editing');
+
+      if (isEditing) {
+        row.classList.remove('editing');
+        button.textContent = 'Edit';
+        [...row.cells].forEach((cell, index) => {
+          if (index < 6) {
+            const input = cell.querySelector('input');
+            if (input) {
+              let value = input.value;
+              if (index === 5) {
+                value = value.trim().toLowerCase() === 'active'
+                  ? `<span class="status-active">Active</span>`
+                  : `<span class="status-inactive">Inactive</span>`;
+                cell.innerHTML = value;
+              } else {
+                cell.textContent = input.value;
+              }
+            }
+          }
+        });
+      } else {
+        row.classList.add('editing');
+        button.textContent = 'Save';
+        [...row.cells].forEach((cell, index) => {
+          if (index < 6) {
+            const value = cell.textContent;
+            cell.innerHTML = `<input type="text" value="${value}">`;
+          }
+        });
+      }
+    }
+
+    function deleteRow(button) {
+      const row = button.parentElement.parentElement;
+      row.remove();
+    }
+
+    const form = document.getElementById('addForm');
+    const modal = document.getElementById('addModal');
+    const tableBody = document.getElementById('customerTable').getElementsByTagName('tbody')[0];
+
+    function openModal() {
+      modal.style.display = "block";
+    }
+
+    function closeModal() {
+      modal.style.display = "none";
+      form.reset();
+    }
+
+    window.onclick = function(event) {
+      if (event.target === modal) {
+        closeModal();
+      }
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const id = document.getElementById('custId').value;
+      const name = document.getElementById('custName').value;
+      const address = document.getElementById('custAddress').value;
+      const postcode = document.getElementById('custPostcode').value;
+      const state = document.getElementById('custState').value;
+      const status = document.getElementById('custStatus').value;
+
+      const statusClass = status.toLowerCase() === 'active' ? 'status-active' : 'status-inactive';
+
+      const newRow = tableBody.insertRow();
+      newRow.innerHTML = `
+        <td>${id}</td>
+        <td>${name}</td>
+        <td>${address}</td>
+        <td>${postcode}</td>
+        <td>${state}</td>
+        <td class="${statusClass}">${status}</td>
+        <td class="action-btn">
+          <button onclick="toggleEdit(this)">Edit</button>
+          <button class="delete-btn" onclick="deleteRow(this)">Delete</button>
+        </td>
+      `;
+
+      closeModal();
+    });
+  </script>
+
+</body>
+</html>
